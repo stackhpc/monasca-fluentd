@@ -14,7 +14,7 @@ RUN mkdir /fluentd-monasca \
     && cd /fluentd-monasca \
     && tar -zxf /fluentd-monasca.tar.gz \
     && rm /fluentd-monasca.tar.gz
-RUN cd /fluentd-monasca/fluentd-monasca-master \
+RUN cd /fluentd-monasca/fluentd-monasca-1.0.1 \
     && gem build fluentd-monasca-output.gemspec \
     && gem install fluentd-monasca-output-1.0.1.gem \
     && fluent-gem install fluentd-monasca-output-1.0.1.gem
