@@ -1,13 +1,14 @@
-FROM fluent/fluentd:v0.12-debian-onbuild
+FROM fluent/fluentd:v1.11.1-debian-1.0
 MAINTAINER Doug Szumski <doug@stackhpc.com>
+USER root
 
-RUN buildDeps="sudo make gcc g++ libc-dev ruby-dev" \
+RUN buildDeps="make gcc g++ libc-dev ruby-dev" \
  && apt-get update \
  && apt-get install -y --no-install-recommends $buildDeps
 
 # Install a custom fluentd output plugin that forwards logs to the monasca
 # log API.
-ADD https://github.com/stackhpc/fluentd-monasca/archive/master.tar.gz /fluentd-monasca.tar.gz
+ADD https://github.com/monasca/fluentd-monasca/archive/master.tar.gz /fluentd-monasca.tar.gz
 
 RUN mkdir /fluentd-monasca \
     && cd /fluentd-monasca \
@@ -15,8 +16,8 @@ RUN mkdir /fluentd-monasca \
     && rm /fluentd-monasca.tar.gz
 RUN cd /fluentd-monasca/fluentd-monasca-master \
     && gem build fluentd-monasca-output.gemspec \
-    && gem install fluentd-monasca-output-0.0.1.gem \
-    && fluent-gem install fluentd-monasca-output-0.0.1.gem
+    && gem install fluentd-monasca-output-1.0.1.gem \
+    && fluent-gem install fluentd-monasca-output-1.0.1.gem
 
 RUN gem sources --clear-all \
  && SUDO_FORCE_REMOVE=yes \
@@ -26,4 +27,5 @@ RUN gem sources --clear-all \
  && rm -rf /var/lib/apt/lists/* \
            /home/fluent/.gem/ruby/2.3.0/cache/*.gem
 
+USER fluent
 EXPOSE 24284
