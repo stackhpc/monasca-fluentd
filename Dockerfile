@@ -8,7 +8,7 @@ RUN buildDeps="make gcc g++ libc-dev ruby-dev" \
 
 # Install a custom fluentd output plugin that forwards logs to the monasca
 # log API.
-ADD https://github.com/monasca/fluentd-monasca/archive/master.tar.gz /fluentd-monasca.tar.gz
+ADD https://github.com/monasca/fluentd-monasca/archive/1.0.1.tar.gz /fluentd-monasca.tar.gz
 
 RUN mkdir /fluentd-monasca \
     && cd /fluentd-monasca \
