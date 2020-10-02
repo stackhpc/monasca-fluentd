@@ -1,0 +1,13 @@
+fluentd:
+  image:
+    repository: stackhpc/monasca-fluentd
+    tag:  # default is appVersion
+    pullPolicy: Always
+monasca_log_url: http://monasca:5607
+keystone:
+  url: http://keystone:35357/v3
+  os_username: mini-mon
+  os_password: password
+  os_domain_id: default
+  os_project_name: mini-mon
+log_level: INFO

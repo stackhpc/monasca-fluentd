@@ -1,31 +1,27 @@
-FROM fluent/fluentd:v1.11.1-debian-1.0
+ARG TAG=v1.0-debian
+FROM fluent/fluentd:$TAG
 MAINTAINER Doug Szumski <doug@stackhpc.com>
-USER root
 
-RUN buildDeps="make gcc g++ libc-dev ruby-dev" \
- && apt-get update \
- && apt-get install -y --no-install-recommends $buildDeps
+ARG FLUENTD_MONASCA_VERSION=0.1.2
+ARG BUILD_DEPS="make gcc g++ libc-dev ruby-dev"
 
-# Install a custom fluentd output plugin that forwards logs to the monasca
-# log API.
-ADD https://github.com/monasca/fluentd-monasca/archive/1.0.1.tar.gz /fluentd-monasca.tar.gz
-
-RUN mkdir /fluentd-monasca \
-    && cd /fluentd-monasca \
-    && tar -zxf /fluentd-monasca.tar.gz \
-    && rm /fluentd-monasca.tar.gz
-RUN cd /fluentd-monasca/fluentd-monasca-1.0.1 \
+# Install a custom fluentd output plugin that forwards logs to the monasca log API.
+ADD https://github.com/monasca/fluentd-monasca/archive/${FLUENTD_MONASCA_VERSION}.tar.gz fluentd-monasca.tar.gz
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ${BUILD_DEPS} \
+    && tar -zxf fluentd-monasca.tar.gz \
+    && rm fluentd-monasca.tar.gz \
+    && cd fluentd-monasca-${FLUENTD_MONASCA_VERSION} \
     && gem build fluentd-monasca-output.gemspec \
-    && gem install fluentd-monasca-output-1.0.1.gem \
-    && fluent-gem install fluentd-monasca-output-1.0.1.gem
+    && gem install fluentd-monasca-output-${FLUENTD_MONASCA_VERSION}.gem \
+    && fluent-gem install fluentd-monasca-output-${FLUENTD_MONASCA_VERSION}.gem \
+    && gem sources --clear-all \
+    && SUDO_FORCE_REMOVE=yes \
+       apt-get purge -y --auto-remove \
+                     -o APT::AutoRemove::RecommendsImportant=false \
+                     ${BUILD_DEPS} \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN gem sources --clear-all \
- && SUDO_FORCE_REMOVE=yes \
-    apt-get purge -y --auto-remove \
-                  -o APT::AutoRemove::RecommendsImportant=false \
-                  $buildDeps \
- && rm -rf /var/lib/apt/lists/* \
-           /home/fluent/.gem/ruby/2.3.0/cache/*.gem
+COPY ./fluentd/etc/ /fluentd/etc/
 
-USER fluent
 EXPOSE 24284
